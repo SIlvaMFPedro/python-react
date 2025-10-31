@@ -137,13 +137,14 @@ function App() {
                 }}
             >
                 {todos.map((t) => (
-                    <Card key={t.id} style={{ maxWidth: 350, width: "100%", margin: "0 auto" }}>
-                        {t.image_url && (
+                    <Card key={t.id} style={{ maxWidth: 350, margin: "0 auto" }}>
+                        {t.thumbnail_url && (
                             <CardMedia
                                 component="img"
                                 height="200"
-                                image={`http://127.0.0.1:5000${t.image_url}`}
+                                image={t.thumbnail_url}
                                 alt={t.task}
+                                sx={{ objectFit: "cover" }}
                             />
                         )}
                         <CardContent>
@@ -160,6 +161,16 @@ function App() {
                             >
                                 {t.task}
                             </Typography>
+                            {t.image_url && (
+                                <Button
+                                    href={t.image_url}
+                                    target="_blank"
+                                    size="small"
+                                    sx={{ mt: 1 }}
+                                >
+                                    View Full Image
+                                </Button>
+                            )}
                             <Button
                                 size="small"
                                 color="error"
