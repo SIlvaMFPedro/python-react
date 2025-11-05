@@ -1,8 +1,8 @@
 from time import sleep
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from game_engine import SnakeGame, Direction
-from ai_agent import SnakeAI
+from .game_engine import SnakeGame, Direction
+from .ai_agent import SnakeAI
 import json
 import asyncio
 

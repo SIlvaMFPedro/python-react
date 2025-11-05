@@ -1,6 +1,6 @@
 from collections import deque
 import heapq
-from game_engine import Direction
+from .game_engine import Direction
 
 class SnakeAI:
     """
