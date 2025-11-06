@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useCallback, useState } from "react";
 import {
     type Position,
     type AIStrategy,
@@ -29,6 +29,7 @@ const SnakeGame: React.FC = () => {
     // Set state variables
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wsRef = useRef<WebSocket | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -52,14 +53,22 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to start game
          */
+        console.log('Starting Game');
         sendAction({ action: 'start' });
         setIsPlaying(true);
+        // Focus container after starting
+        setTimeout(() => {
+            if (containerRef.current) {
+                containerRef.current.focus();
+            }
+        }, 100);
     };
 
     const resetGame = (): void => {
         /**
          * Sends message to reset game
          */
+        console.log('Reset Game');
         sendAction({ action: 'reset' });
         setIsPlaying(false);
         setAIMode(false);
@@ -69,6 +78,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to pause game
          */
+        console.log('Paused Game');
         sendAction({ action: 'pause' });
         setIsPlaying(false);
     };
@@ -77,6 +87,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to toggle ai mode
          */
+        console.log('Toggle AI');
         sendAction({ action: 'toggle_ai' });
     }
 
@@ -84,8 +95,45 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to change ai strategy
          */
+        console.log('Changing AI strategy to: ', strategy);
         sendAction({ action: 'set_ai_strategy', strategy});
     }
+
+    const handleKeyPress = useCallback((event: KeyboardEvent): void => {
+        console.log('Key pressed:', event.key, 'Code:', event.code, 'Playing:', isPlaying, 'AI Mode:', aiMode);
+
+        if (!isPlaying) {
+            console.log('Game not playing. Ignoring input...');
+            return;
+        }
+
+        // Toggle AI with spacebar
+        if (event.code === 'Space' || event.key === ' '){
+            event.preventDefault();
+            console.log('Toggling AI');
+            toggleAI();
+            return;
+        }
+
+        // Only accept manual controls if AI is off
+        if (aiMode) {
+            console.log('AI mode active. Ignoring manual controls...');
+            return;
+        }
+        if (isDirectionKey(event.key)) {
+            event.preventDefault(); // Prevent page scrolling
+            const direction = KEYBOARD_CONTROLS[event.key];
+            console.log('Sending direction: ', direction);
+            if (wsRef.current) {
+                const message: ActionMessage = {
+                    action: 'direction',
+                    direction: direction
+                };
+                wsRef.current.send(JSON.stringify(message));
+            }
+        }
+
+    }, [isPlaying, aiMode, toggleAI]);
 
     // Handle websocket connection
     useEffect(() => {
@@ -134,34 +182,14 @@ const SnakeGame: React.FC = () => {
 
     // Handle keyboard
     useEffect(() => {
-        // Handle keyboard input
-        const handleKeyPress = (event: KeyboardEvent) => {
-            if (!isPlaying) return;
-            // Toggle AI with spacebar
-            if (event.code === 'Space') {
-                event.preventDefault();
-                toggleAI();
-                return;
-            }
+        // Add keyboard event listener to document
+        console.log('Setting up keyboard listener, isPlaying: ', isPlaying, 'aiMode: ', aiMode);
+        document.addEventListener('keydown', handleKeyPress);
 
-            // Only accept manual controls if AI is off
-            if (aiMode) return;
-
-            if (isDirectionKey(event.key)) {
-                const direction = KEYBOARD_CONTROLS[event.key];
-                if (wsRef.current) {
-                    const message: ActionMessage = {
-                        action: 'direction',
-                        direction: direction
-                    };
-                    wsRef.current.send(JSON.stringify(message));
-                }
-            }
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress);
         };
-
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [isPlaying, aiMode, toggleAI]);
+    }, [aiMode, handleKeyPress, isPlaying]);
 
     // Handle draw game logic
     useEffect(() => {
@@ -240,17 +268,41 @@ const SnakeGame: React.FC = () => {
         }
     }, [gameState, aiMode, aiStrategy, CANVAS_SIZE, CELL_SIZE, GRID_SIZE]);
 
+    // Focus on mount and when game starts
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.focus();
+        }
+    }, [isPlaying]);
+
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            padding: '20px',
-            backgroundColor: '#0f0f1e',
-            minHeight: '100vh',
-        }}>
+        <div
+            ref={containerRef}
+            tabIndex={0}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '20px',
+                padding: '20px',
+                backgroundColor: '#0f0f1e',
+                minHeight: '100vh',
+                outline: 'none',
+            }}
+            onClick={() => containerRef.current?.focus()}
+        >
             <h1 style={{ color: COLORS.snakeHead, margin: 0}}>🐍 Snake Game {aiMode && '🤖'}</h1>
+            {/* Debug Info */}
+            <div style={{
+                backgroundColor: '#2c3e50',
+                padding: '10px',
+                borderRadius: '5px',
+                color: '#fff',
+                fontSize: '12px',
+                fontFamily: 'monospace'
+            }}>
+                Debug: Connected={isConnected ? '✅' : '❌'} | Playing={isPlaying ? '✅' : '❌'} | AI={aiMode ? '✅' : '❌'}
+            </div>
             <div style={{
                backgroundColor: COLORS.grid,
                padding: '20px',
@@ -298,8 +350,10 @@ const SnakeGame: React.FC = () => {
                     borderRadius: '10px',
                     boxShadow: aiMode
                         ? '0 0 20px rgba(155, 89, 182, 0.5)'
-                        : '0 0 20px rgba(78, 205, 196, 0.3)'
+                        : '0 0 20px rgba(78, 205, 196, 0.3)',
+                    cursor: 'pointer',
                 }}
+                onClick={() => containerRef.current?.focus()}
             />
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
                 <button
