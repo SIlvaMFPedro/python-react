@@ -21,6 +21,22 @@ import {
     drawGrid,
     clearCanvas
 } from "../utils/utils.ts";
+import {
+    Box,
+    Paper,
+    Button,
+    Typography,
+    Chip,
+    Stack,
+    ButtonGroup
+} from '@mui/material';
+import {
+    PlayArrow,
+    Pause,
+    Refresh,
+    SmartToy
+} from '@mui/icons-material';
+import styles from '../styles/SnakeGame.module.scss';
 
 // ============================================
 //         SNAKE GAME REACT COMPONENT
@@ -53,7 +69,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to start game
          */
-        console.log('Starting Game');
+        // console.log('Starting Game');
         sendAction({ action: 'start' });
         setIsPlaying(true);
         // Focus container after starting
@@ -68,7 +84,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to reset game
          */
-        console.log('Reset Game');
+        // console.log('Reset Game');
         sendAction({ action: 'reset' });
         setIsPlaying(false);
         setAIMode(false);
@@ -78,7 +94,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to pause game
          */
-        console.log('Paused Game');
+        // console.log('Paused Game');
         sendAction({ action: 'pause' });
         setIsPlaying(false);
     };
@@ -87,7 +103,7 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to toggle ai mode
          */
-        console.log('Toggle AI');
+        // console.log('Toggle AI');
         sendAction({ action: 'toggle_ai' });
     }
 
@@ -95,35 +111,35 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends message to change ai strategy
          */
-        console.log('Changing AI strategy to: ', strategy);
+        // console.log('Changing AI strategy to: ', strategy);
         sendAction({ action: 'set_ai_strategy', strategy});
     }
 
     const handleKeyPress = useCallback((event: KeyboardEvent): void => {
-        console.log('Key pressed:', event.key, 'Code:', event.code, 'Playing:', isPlaying, 'AI Mode:', aiMode);
+        // console.log('Key pressed:', event.key, 'Code:', event.code, 'Playing:', isPlaying, 'AI Mode:', aiMode);
 
         if (!isPlaying) {
-            console.log('Game not playing. Ignoring input...');
+            // console.log('Game not playing. Ignoring input...');
             return;
         }
 
         // Toggle AI with spacebar
         if (event.code === 'Space' || event.key === ' '){
             event.preventDefault();
-            console.log('Toggling AI');
+            // console.log('Toggling AI');
             toggleAI();
             return;
         }
 
         // Only accept manual controls if AI is off
         if (aiMode) {
-            console.log('AI mode active. Ignoring manual controls...');
+            // console.log('AI mode active. Ignoring manual controls...');
             return;
         }
         if (isDirectionKey(event.key)) {
             event.preventDefault(); // Prevent page scrolling
             const direction = KEYBOARD_CONTROLS[event.key];
-            console.log('Sending direction: ', direction);
+            // console.log('Sending direction: ', direction);
             if (wsRef.current) {
                 const message: ActionMessage = {
                     action: 'direction',
@@ -183,7 +199,7 @@ const SnakeGame: React.FC = () => {
     // Handle keyboard
     useEffect(() => {
         // Add keyboard event listener to document
-        console.log('Setting up keyboard listener, isPlaying: ', isPlaying, 'aiMode: ', aiMode);
+        // console.log('Setting up keyboard listener, isPlaying: ', isPlaying, 'aiMode: ', aiMode);
         document.addEventListener('keydown', handleKeyPress);
 
         return () => {
@@ -276,217 +292,190 @@ const SnakeGame: React.FC = () => {
     }, [isPlaying]);
 
     return (
-        <div
+        <Box
             ref={containerRef}
             tabIndex={0}
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '20px',
-                padding: '20px',
-                backgroundColor: '#0f0f1e',
-                minHeight: '100vh',
-                outline: 'none',
-            }}
+            className={styles.gameContainer}
             onClick={() => containerRef.current?.focus()}
         >
-            <h1 style={{ color: COLORS.snakeHead, margin: 0}}>🐍 Snake Game {aiMode && '🤖'}</h1>
+            <Typography variant="h2" className={styles.title}>
+                🐍 Snake Game {aiMode && '🤖'}
+            </Typography>
+
             {/* Debug Info */}
-            <div style={{
-                backgroundColor: '#2c3e50',
-                padding: '10px',
-                borderRadius: '5px',
-                color: '#fff',
-                fontSize: '12px',
-                fontFamily: 'monospace'
-            }}>
-                Debug: Connected={isConnected ? '✅' : '❌'} | Playing={isPlaying ? '✅' : '❌'} | AI={aiMode ? '✅' : '❌'}
-            </div>
-            <div style={{
-               backgroundColor: COLORS.grid,
-               padding: '20px',
-               borderRadius: '10px',
-               color: COLORS.text,
-               minWidth: '500px'
-            }}>
-                <div style={{ display: 'flex', gap: '30px', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div>
-                        Score: <strong style={{ color: COLORS.snakeHead}}>{gameState?.score || 0}</strong>
-                    </div>
-                    <div>
-                        Moves: <strong>{gameState?.moves || 0}</strong>
-                    </div>
-                    <div>
-                        Status: <strong style={{ color: isConnected ? COLORS.snakeHead : COLORS.food}}>{isConnected ? 'Connected' : 'Disconnected'}</strong>
-                    </div>
-                </div>
-                <div style={{
-                    padding: '10px',
-                    backgroundColor: aiMode ? COLORS.overlay : 'transparent',
-                    borderRadius: '5px',
-                    border: aiMode ? `2px solid ${COLORS.aiSnakeHead}` : 'none',
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>
-                              Mode: <strong style={{ color: aiMode ? COLORS.aiSnakeHead : COLORS.snakeHead }}>
+            <Paper className={styles.debugInfo} elevation={2}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Chip
+                        size="small"
+                        label={isConnected ? 'Connected' : 'Disconnected'}
+                        color={isConnected ? 'success' : 'error'}
+                    />
+                    <Chip
+                        size="small"
+                        label={isPlaying ? 'Playing' : 'Idle'}
+                        color={isPlaying ? 'primary' : 'default'}
+                    />
+                    <Chip
+                        size="small"
+                        label={aiMode ? 'AI Active' : 'Manual'}
+                        color={aiMode ? 'secondary' : 'default'}
+                    />
+                </Box>
+            </Paper>
+
+            {/* Info Panel */}
+            <Paper className={styles.infoPanel} elevation={3}>
+                <Box className={styles.statsRow}>
+                    <Box className={styles.statItem}>
+                        <Typography variant="body1" component="div">
+                            Score: <strong>{gameState?.score || 0}</strong>
+                        </Typography>
+                    </Box>
+                    <Box className={styles.statItem}>
+                        <Typography variant="body1" component="div">
+                            Moves: <strong>{gameState?.moves || 0}</strong>
+                        </Typography>
+                    </Box>
+                    <Box className={styles.statItem}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body1" component="span">
+                                Status:
+                            </Typography>
+                            <Chip
+                                label={isConnected ? 'Connected' : 'Disconnected'}
+                                color={isConnected ? 'success' : 'error'}
+                                size="small"
+                            />
+                        </Box>
+                    </Box>
+                </Box>
+
+                <Box className={`${styles.modeIndicator} ${aiMode ? styles.aiMode : styles.manual}`}>
+                    <Box className={styles.modeContent}>
+                        <Typography variant="body1" component="div">
+                            Mode:{' '}
+                            <strong className={aiMode ? styles.ai : styles.manual}>
                                 {aiMode ? '🤖 AI Auto-Pilot' : '👤 Manual'}
-                              </strong>
-                        </span>
+                            </strong>
+                        </Typography>
                         {aiMode && (
-                            <span style={{ fontSize: '14px', color: COLORS.aiSnakeHead }}>
+                            <Typography variant="body2" component="div" className={styles.strategyName}>
                                 Strategy: {aiStrategy.toUpperCase()}
-                            </span>
+                            </Typography>
                         )}
-                    </div>
-                </div>
-            </div>
+                    </Box>
+                </Box>
+            </Paper>
+
+            {/* Canvas */}
             <canvas
                 ref={canvasRef}
                 width={CANVAS_SIZE}
                 height={CANVAS_SIZE}
-                style={{
-                    border: aiMode ? `3px solid ${COLORS.aiSnakeHead}` : `3px solid ${COLORS.snakeHead}`,
-                    borderRadius: '10px',
-                    boxShadow: aiMode
-                        ? '0 0 20px rgba(155, 89, 182, 0.5)'
-                        : '0 0 20px rgba(78, 205, 196, 0.3)',
-                    cursor: 'pointer',
-                }}
+                className={`${styles.canvas} ${aiMode ? styles.aiMode : ''}`}
                 onClick={() => containerRef.current?.focus()}
             />
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
-                <button
+
+            {/* Control Buttons */}
+            <Stack direction="row" spacing={2} className={styles.buttonContainer} flexWrap="wrap">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PlayArrow />}
                     onClick={startGame}
                     disabled={!isConnected || isPlaying}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: COLORS.snakeHead,
-                        color: '#0f0f1e',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: isConnected && !isPlaying ? 'pointer' : 'not-allowed',
-                        fontWeight: 'bold',
-                        opacity: isConnected && !isPlaying ? 1 : 0.5
-                    }}
+                    className={styles.button}
                 >
-                    ▶ Start
-                </button>
-                <button
+                    Start
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="warning"
+                    startIcon={<Pause />}
                     onClick={pauseGame}
                     disabled={!isConnected || !isPlaying}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: '#ffd93d',
-                        color: '#0f0f1e',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: isConnected && isPlaying ? 'pointer' : 'not-allowed',
-                        fontWeight: 'bold',
-                        opacity: isConnected && isPlaying ? 1 : 0.5
-                    }}
+                    className={`${styles.button} ${styles.pauseButton}`}
                 >
-                    ⏸ Pause
-                </button>
-                <button
+                    Pause
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<Refresh />}
                     onClick={resetGame}
                     disabled={!isConnected}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: COLORS.food,
-                        color: COLORS.text,
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: isConnected ? 'pointer' : 'not-allowed',
-                        fontWeight: 'bold',
-                        opacity: isConnected ? 1 : 0.5
-                    }}
+                    className={`${styles.button} ${styles.resetButton}`}
                 >
-                    🔄 Reset
-                </button>
-                <button
+                    Reset
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color={aiMode ? 'secondary' : 'info'}
+                    startIcon={<SmartToy />}
                     onClick={toggleAI}
                     disabled={!isConnected || !isPlaying}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: aiMode ? COLORS.aiSnakeHead : '#3498db',
-                        color: COLORS.text,
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: isConnected && isPlaying ? 'pointer' : 'not-allowed',
-                        fontWeight: 'bold',
-                        opacity: isConnected && isPlaying ? 1 : 0.5
-                    }}
+                    className={`${styles.button} ${styles.aiButton} ${aiMode ? styles.aiActive : ''}`}
                 >
-                    {aiMode ? '🤖 AI ON' : '🤖 AI OFF'}
-                </button>
-            </div>
+                    {aiMode ? 'AI ON' : 'AI OFF'}
+                </Button>
+            </Stack>
+
             {/* AI Strategy Selector */}
             {aiMode && (
-                <div style={{
-                    backgroundColor: COLORS.grid,
-                    padding: '15px',
-                    borderRadius: '10px',
-                    color: COLORS.text,
-                    border: '2px solid ${COLORS.aiSnakeHead}`'
-                }}>
-                    <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>AI Strategy:</div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                <Paper className={styles.strategySelector} elevation={3}>
+                    <Typography variant="h6" className={styles.strategyTitle}>
+                        AI Strategy
+                    </Typography>
+                    <ButtonGroup variant="contained" className={styles.strategyButtons}>
                         {(['simple', 'astar', 'safe'] as AIStrategy[]).map((strategy) => (
-                            <button
+                            <Button
                                 key={strategy}
                                 onClick={() => changeAIStrategy(strategy)}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: aiStrategy === strategy ? COLORS.aiSnakeHead : '#2c3e50',
-                                    color: COLORS.text,
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px'
-                                }}
+                                variant={aiStrategy === strategy ? 'contained' : 'outlined'}
+                                color="secondary"
                             >
                                 {formatStrategyName(strategy)}
-                            </button>
+                            </Button>
                         ))}
-                    </div>
-                </div>
+                    </ButtonGroup>
+                </Paper>
             )}
-            <div style={{
-                backgroundColor: COLORS.grid,
-                padding: '15px',
-                borderRadius: '10px',
-                color: COLORS.text,
-                maxWidth: '500px',
-                textAlign: 'center'
-            }}>
-                <strong>Controls:</strong>
-                <div style={{ marginTop: '8px', fontSize: '14px' }}>
-                    🎮 Arrow Keys or WASD - Move snake<br/>
-                    <span style={{ color: COLORS.aiSnakeHead }}>⚡ SPACEBAR - Toggle AI Auto-Pilot</span>
-                </div>
-            </div>
-            <div style={{
-                backgroundColor: '#2c3e50',
-                padding: '15px',
-                borderRadius: '10px',
-                color: COLORS.text,
-                maxWidth: '500px'
-            }}>
-                <strong style={{ color: COLORS.aiSnakeHead }}>🤖 AI Strategies:</strong>
-                <ul style={{ marginTop: '10px', fontSize: '14px', lineHeight: '1.6'}}>
+
+            {/* Controls Info */}
+            <Paper className={styles.controlsInfo} elevation={2}>
+                <Typography variant="h6" className={styles.controlsTitle}>
+                    Controls
+                </Typography>
+                <Box className={styles.controlsText}>
+                    <Typography variant="body2" component="div">
+                        🎮 Arrow Keys or WASD - Move snake
+                    </Typography>
+                    <Typography variant="body2" component="div" className={styles.aiControl}>
+                        ⚡ SPACEBAR - Toggle AI Auto-Pilot
+                    </Typography>
+                </Box>
+                <Typography variant="caption" component="div" className={styles.controlsTip}>
+                    💡 Tip: Click anywhere to ensure keyboard focus
+                </Typography>
+            </Paper>
+
+            {/* Strategy Info */}
+            <Paper className={styles.strategyInfo} elevation={2}>
+                <Typography variant="h6" className={styles.strategyInfoTitle}>
+                    🤖 AI Strategies
+                </Typography>
+                <ul className={styles.strategyList}>
                     {(['simple', 'astar', 'safe'] as AIStrategy[]).map((strategy) => (
                         <li key={strategy}>
                             <strong>{formatStrategyName(strategy)}:</strong> {getStrategyDescription(strategy)}
                         </li>
                     ))}
                 </ul>
-            </div>
-        </div>
+            </Paper>
+        </Box>
     );
 };
 
