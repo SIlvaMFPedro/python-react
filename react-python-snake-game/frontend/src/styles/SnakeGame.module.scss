@@ -1,0 +1,343 @@
+@import './variables';
+@import './mixins';
+
+// ============================================
+//    Main Container
+// ============================================
+
+.gameContainer {
+  @include flex-column;
+  align-items: center;
+  gap: $spacing-xl;
+  padding: $spacing-xl;
+  background-color: $bg-primary;
+  min-height: 100vh;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// ============================================
+//    Title
+// ============================================
+
+.title {
+  color: $primary-color;
+  margin: 0;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  @include text-gradient($primary-color, $primary-light);
+  @include fade-in;
+}
+
+// ============================================
+//    Debug Info
+// ============================================
+
+.debugInfo {
+  @include panel;
+  padding: $spacing-md;
+  font-size: $font-size-xs;
+  font-family: $font-family-mono;
+
+  .statusIndicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: $spacing-xs;
+
+    &.connected {
+      background-color: $color-success;
+    }
+    &.disconnected {
+      background-color: $color-danger;
+    }
+  }
+}
+
+// ============================================
+//    Info Panel
+// ============================================
+
+.infoPanel {
+  @include panel;
+  min-width: 500px;
+  @include slide-in-up;
+
+  @include mobile {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .statsRow {
+    @include flex-between;
+    gap: $spacing-xxxl;
+    margin-bottom: $spacing-md;
+
+    .statItem {
+      strong {
+        color: $primary-color;
+      }
+    }
+  }
+
+  .modeIndicator {
+    padding: $spacing-md;
+    border-radius: $border-radius-sm;
+    transition: all $transition-normal;
+
+    &.manual {
+      background-color: transparent;
+      border: none;
+    }
+
+    &.aiMode {
+      background-color: $overlay-ai;
+      border: $border-width-medium solid $secondary-color;
+    }
+
+    .modeContent {
+      @include flex-between;
+
+      .modeName {
+        font-weight: $font-weight-bold;
+
+        &.manual {
+          color: $primary-color;
+        }
+
+        &.ai {
+          color: $secondary-color;
+        }
+      }
+
+      .strategyName {
+        font-size: $font-size-sm;
+        color: $secondary-color;
+      }
+    }
+  }
+}
+
+// ============================================
+//    Canvas
+// ============================================
+
+.canvas {
+  @include canvas-border($primary-color, true);
+  cursor: pointer;
+  transition: all $transition-normal;
+  @include fade-in(0.5s);
+
+  &.aiMode {
+    @include canvas-border($secondary-color, true);
+    box-shadow: $shadow-glow-secondary;
+  }
+
+  &:hover {
+    transform: scale(1.01);
+  }
+}
+
+// ============================================
+//    Button Container
+// ============================================
+
+.buttonContainer {
+  @include flex-wrap;
+  gap: $spacing-md;
+  justify-content: center;
+
+  .button {
+    @include button-primary;
+
+    &.pauseButton {
+      background-color: $color-warning;
+      color: $bg-primary;
+    }
+
+    &.resetButton {
+      @include button-danger;
+    }
+
+    &.aiButton {
+      background-color: $color-info;
+
+      &.aiActive {
+        @include button-secondary;
+      }
+    }
+  }
+}
+
+// ============================================
+//    AI Strategy Selector
+// ============================================
+
+.strategySelector {
+  @include panel-bordered($secondary-color);
+  @include slide-in-up(0.3s);
+
+  .strategyTitle {
+    margin-bottom: $spacing-md;
+    font-weight: $font-weight-bold;
+  }
+
+  .strategyButtons {
+    @include flex-wrap;
+    gap: $spacing-md;
+
+    .strategyButton {
+      padding: $spacing-sm $spacing-lg;
+      background-color: $bg-dark;
+      color: $text-primary;
+      border: none;
+      border-radius: $border-radius-sm;
+      cursor: pointer;
+      font-size: $font-size-sm;
+      transition: all $transition-fast;
+
+      &:hover {
+        background-color: lighten($bg-dark, 10%);
+        transform: translateY(-2px);
+      }
+
+      &.active {
+        background-color: $secondary-color;
+        font-weight: $font-weight-bold;
+      }
+    }
+  }
+}
+
+// ============================================
+//    Controls Info
+// ============================================
+
+.controlsInfo {
+  @include panel;
+  max-width: 500px;
+  text-align: center;
+
+  @include mobile {
+    max-width: 100%;
+  }
+
+  .controlsTitle {
+    font-weight: $font-weight-bold;
+  }
+
+  .controlsText {
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+    line-height: 1.6;
+
+    .aiControl {
+      color: $secondary-color;
+    }
+  }
+
+  .controlsTip {
+    margin-top: $spacing-md;
+    font-size: $font-size-xs;
+    color: $text-secondary;
+  }
+}
+
+// ============================================
+//    Strategy Info
+// ============================================
+
+.strategyInfo {
+  @include panel;
+  background-color: $bg-dark;
+  max-width: 500px;
+
+  @include mobile {
+    max-width: 100%;
+  }
+
+  .strategyInfoTitle {
+    font-weight: $font-weight-bold;
+    color: $secondary-color;
+  }
+
+  .strategyList {
+    margin-top: $spacing-md;
+    font-size: $font-size-sm;
+    line-height: 1.6;
+    padding-left: $spacing-xl;
+
+    li {
+      margin-bottom: $spacing-sm;
+
+      strong {
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+// ============================================
+//    Animations
+// ============================================
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px $primary-color;
+  }
+  50% {
+    box-shadow: 0 0 20px $primary-color, 0 0 30px $primary-color;
+  }
+}
+
+.glowing {
+  animation: glow 2s infinite;
+}
+
+// ============================================
+//    Responsive Design
+// ============================================
+
+@include tablet {
+  .gameContainer {
+    padding: $spacing-md;
+    gap: $spacing-md;
+  }
+
+  .infoPanel {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .buttonContainer {
+    width: 100%;
+
+    .button {
+      flex: 1 1 calc(50% - #{$spacing-sm});
+      min-width: 120px;
+    }
+  }
+}
+
+@include mobile {
+  .title {
+    font-size: $font-size-xl;
+  }
+
+  .canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .statsRow {
+    flex-direction: column;
+    gap: $spacing-sm !important;
+
+    .statItem {
+      width: 100%;
+    }
+  }
+}
