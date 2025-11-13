@@ -102,6 +102,42 @@ class SnakeAI:
         """
             Safety first strategy: prioritize survival over food
         """
+        snake = game_state['snake']
+        food = game_state['food']
+        head = snake[0]
+        grid_size = game_state['grid_size']
+        current_direction = Direction(game_state['direction'])
+
+        # Try A* strategy first
+        path = self.astar_search(head, food, snake, grid_size)
+        if path and len(path) > 1:
+            next_pos = path[1]
+            direction = self.get_direction_to_position(head, next_pos)
+            # Check if this move gives us space to move after
+            if self.has_escape_route(next_pos, game_state):
+                return direction
+        # If A* strategy is risky, find safest direction
+        best_direction = None
+        max_space = -1
+        for direction in Direction:
+            if self.is_move_safe(head, direction, game_state):
+                next_pos = self.get_next_position(head, direction)
+                space = self.count_reachable_spaces(next_pos, game_state)
+                if space > max_space:
+                    max_space = space
+                    best_direction = direction
+        # If we found a safe direction, return it
+        if best_direction is not None:
+            return best_direction
+        # Last resort: try any direction that doesn't immediately kill the snake
+        for direction in Direction:
+            next_pos = self.get_next_position(head, direction)
+            x, y = next_pos
+            # Just check bounds, ignore snake collision (desperate move)
+            if 0 <= x < grid_size and 0 <= y < grid_size:
+                return direction
+        # Absolutely no options, return current direction
+        return current_direction
 
     def astar_search(self, start, goal, snake, grid_size):
         """

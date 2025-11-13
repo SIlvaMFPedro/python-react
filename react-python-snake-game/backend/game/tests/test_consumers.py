@@ -1,19 +1,7 @@
 from channels.testing import WebsocketCommunicator
-from channels.routing import URLRouter
-from django.core.handlers.exception import response_for_exception
-from django.urls import re_path
-from game.consumers import GameConsumer
-import json
 import pytest
+import json
 
-@pytest.fixture
-def game_application():
-    """
-        Create a test application for WebSocket testing
-    """
-    return URLRouter([
-        re_path(r'ws/game/(?P<game_id>\w+)/$', GameConsumer.as_asgi()),
-    ])
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
@@ -39,6 +27,7 @@ class TestWebSocketConnection:
         assert 'score' in response['state']
         await communicator.disconnect()
 
+
 @pytest.mark.asyncio
 @pytest.mark.django_db
 class TestGameActions:
@@ -46,7 +35,7 @@ class TestGameActions:
         Test game action messages
     """
     async def test_start_action(self, game_application):
-        communicator = WebsocketCommunicator(game_application, "/ws/game/test")
+        communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()
         # Clear initial state message
         await communicator.receive_json_from()
@@ -58,7 +47,7 @@ class TestGameActions:
         await communicator.disconnect()
 
     async def test_direction_action(self, game_application):
-        communicator = WebsocketCommunicator(game_application, "/ws/game/test")
+        communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()
         # Clear initial state
         await communicator.receive_json_from()
@@ -75,13 +64,13 @@ class TestGameActions:
         await communicator.disconnect()
 
     async def test_reset_action(self, game_application):
-        communicator = WebsocketCommunicator(game_application, "/ws/game/test")
+        communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()
         # Clear initial state
         await communicator.receive_json_from()
         # Send reset action
         await communicator.send_json_to({'action': 'reset'})
-        # Should receive reset game state
+        # Receive reset game state
         response = await communicator.receive_json_from()
         assert response['type'] == 'game_state'
         assert response['state']['score'] == 0
@@ -89,7 +78,7 @@ class TestGameActions:
         await communicator.disconnect()
 
     async def test_pause_action(self, game_application):
-        communicator = WebsocketCommunicator(game_application, "/ws/game/test")
+        communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()
         # Clear initial state
         await communicator.receive_json_from()
@@ -100,6 +89,7 @@ class TestGameActions:
         # Game should stop sending updates
         await communicator.disconnect()
 
+
 @pytest.mark.asyncio
 @pytest.mark.django_db
 class TestAIActions:
@@ -107,7 +97,7 @@ class TestAIActions:
         Test AI-related actions
     """
     async def test_toggle_ai_action(self, game_application):
-        communicator = WebsocketCommunicator(game_application, "/ws/game/test")
+        communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()
         # Clear initial state
         await communicator.receive_json_from()
@@ -129,7 +119,7 @@ class TestAIActions:
             'action': 'set_ai_strategy',
             'strategy': 'simple'
         })
-        # Should receive AI status
+        # Receive AI status
         response = await communicator.receive_json_from()
         assert response['type'] == 'ai_status'
         assert response['strategy'] == 'simple'
@@ -175,6 +165,7 @@ class TestGameLoop:
                     update_count += 1
         except:
             pass  # Timeout is expected
+
         assert update_count >= 1
         await communicator.disconnect()
 
@@ -266,7 +257,6 @@ class TestDisconnection:
     """
         Test disconnection handling
     """
-
     async def test_disconnect_cleans_up(self, game_application):
         communicator = WebsocketCommunicator(game_application, "/ws/game/test/")
         await communicator.connect()

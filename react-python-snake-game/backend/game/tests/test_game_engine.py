@@ -1,9 +1,3 @@
-from operator import truediv
-
-from pkg_resources import require
-from pyasn1.type.tag import initTagSet
-from twisted.mail.maildir import initializeMaildir
-
 from game.game_engine import SnakeGame, Direction
 import pytest
 
@@ -39,11 +33,12 @@ class TestGameInitialization:
     def test_food_generates_on_initialization(self):
         game = SnakeGame()
         assert game.food is not None
-        assert len(game.food) == 2 # (x, y)
+        assert len(game.food) == 2  # (x, y)
 
     def test_food_not_on_snake(self):
         game = SnakeGame()
         assert game.food not in game.snake
+
 
 class TestSnakeMovement:
     """
@@ -54,16 +49,17 @@ class TestSnakeMovement:
         initial_head = game.snake[0]
         game.direction = Direction.UP
         game.update()
-
         new_head = game.snake[0]
         assert new_head == (initial_head[0], initial_head[1] - 1)
 
     def test_snake_moves_down(self):
         game = SnakeGame()
+        # Snake starts pointing UP, need to change to valid direction first
+        game.direction = Direction.LEFT  # Change away from UP
+        game.update()
         initial_head = game.snake[0]
         game.direction = Direction.DOWN
         game.update()
-
         new_head = game.snake[0]
         assert new_head == (initial_head[0], initial_head[1] + 1)
 
@@ -72,7 +68,6 @@ class TestSnakeMovement:
         initial_head = game.snake[0]
         game.direction = Direction.LEFT
         game.update()
-
         new_head = game.snake[0]
         assert new_head == (initial_head[0] - 1, initial_head[1])
 
@@ -81,7 +76,6 @@ class TestSnakeMovement:
         initial_head = game.snake[0]
         game.direction = Direction.RIGHT
         game.update()
-
         new_head = game.snake[0]
         assert new_head == (initial_head[0] + 1, initial_head[1])
 
@@ -119,25 +113,26 @@ class TestDirectionChange:
         game = SnakeGame()
         game.direction = Direction.UP
         game.change_direction(Direction.DOWN)
-        assert game.direction == Direction.UP       # Should stay up
+        assert game.direction == Direction.UP       # Should stay UP
 
     def test_cannot_reverse_left_to_right(self):
         game = SnakeGame()
         game.direction = Direction.LEFT
         game.change_direction(Direction.RIGHT)
-        assert game.direction == Direction.LEFT     # Should stay left
+        assert game.direction == Direction.LEFT     # Should stay LEFT
 
     def test_cannot_reverse_down_to_up(self):
         game = SnakeGame()
         game.direction = Direction.DOWN
         game.change_direction(Direction.UP)
-        assert game.direction == Direction.DOWN     # Should stay down
+        assert game.direction == Direction.DOWN     # Should stay DOWN
 
     def test_cannot_reverse_right_to_left(self):
         game = SnakeGame()
         game.direction = Direction.RIGHT
         game.change_direction(Direction.LEFT)
-        assert game.direction == Direction.RIGHT    # Should stay right
+        assert game.direction == Direction.RIGHT    # Should stay RIGHT
+
 
 class TestFoodConsumption:
     """
@@ -146,9 +141,9 @@ class TestFoodConsumption:
     def test_snake_grows_when_eating_food(self):
         game = SnakeGame()
         initial_length = len(game.snake)
-        # Place food directly in front of the snake
+        # Place food directly in front of snake
         head = game.snake[0]
-        game.food = (head[0], head[1] - 1)      # UP direction
+        game.food = (head[0], head[1] - 1)  # UP direction
         game.direction = Direction.UP
         game.update()
         assert len(game.snake) == initial_length + 1
@@ -174,41 +169,42 @@ class TestFoodConsumption:
         assert game.food != old_food
         assert game.food is not None
 
+
 class TestCollisionDetection:
     """
         Test collision detection
     """
     def test_game_over_when_hitting_top_wall(self):
         game = SnakeGame(grid_size=20)
-        game.snake = [(10, 0), (10, 1), (10, 2)]    # top edge
+        game.snake = [(10, 0), (10, 1), (10, 2)]  # At top edge
         game.direction = Direction.UP
         game.update()
         assert game.game_over is True
 
     def test_game_over_when_hitting_bottom_wall(self):
         game = SnakeGame(grid_size=20)
-        game.snake = [(10, 19), (10, 18), (10, 17)] # bottom edge
+        game.snake = [(10, 19), (10, 18), (10, 17)]  # At bottom edge
         game.direction = Direction.DOWN
         game.update()
         assert game.game_over is True
 
     def test_game_over_when_hitting_left_wall(self):
         game = SnakeGame(grid_size=20)
-        game.snake = [(0, 10), (1, 10), (2, 10)]    # left edge
+        game.snake = [(0, 10), (1, 10), (2, 10)]  # At left edge
         game.direction = Direction.LEFT
         game.update()
         assert game.game_over is True
 
     def test_game_over_when_hitting_right_wall(self):
         game = SnakeGame(grid_size=20)
-        game.snake = [(19, 10), (18, 10), (17, 10)] # right edge
+        game.snake = [(19, 10), (18, 10), (17, 10)]  # At right edge
         game.direction = Direction.RIGHT
         game.update()
         assert game.game_over is True
 
     def test_game_over_when_hitting_self(self):
         game = SnakeGame()
-        # Create scenario where snake will hit itself
+        # Create a scenario where snake will hit itself
         game.snake = [(5, 5), (5, 6), (4, 6), (4, 5)]
         game.direction = Direction.DOWN
         game.update()
@@ -220,6 +216,7 @@ class TestCollisionDetection:
         initial_snake = game.snake.copy()
         game.update()
         assert game.snake == initial_snake
+
 
 class TestGameReset:
     """
@@ -250,6 +247,7 @@ class TestGameReset:
         game.reset()
         assert game.moves == 0
 
+
 class TestGameState:
     """
         Test game state export
@@ -275,11 +273,11 @@ class TestGameState:
         game = SnakeGame()
         game.direction = Direction.UP
         valid_dirs = game.get_valid_directions()
-
         assert Direction.UP in valid_dirs
         assert Direction.LEFT in valid_dirs
         assert Direction.RIGHT in valid_dirs
-        assert Direction.DOWN not in valid_dirs # Opposite of UP
+        assert Direction.DOWN not in valid_dirs  # Opposite of UP
+
 
 class TestEdgeCases:
     """
@@ -290,7 +288,7 @@ class TestEdgeCases:
         game = SnakeGame(grid_size=5)
         # Fill most of the board
         game.snake = [(x, y) for x in range(5) for y in range(5)]
-        game.snake = game.snake[:-1]    # Leave one spot
+        game.snake = game.snake[:-1]  # Leave one spot
         # Should still generate food in remaining spot
         food = game.generate_food()
         assert food not in game.snake
@@ -299,7 +297,7 @@ class TestEdgeCases:
         game = SnakeGame(grid_size=5)
         assert game.grid_size == 5
         game.update()
-        assert not game.game_over   # Should still work
+        assert not game.game_over  # Should still work
 
     def test_multiple_direction_changes_before_update(self):
         game = SnakeGame()
@@ -312,16 +310,19 @@ class TestEdgeCases:
 # Parametrized tests for better coverage
 @pytest.mark.parametrize("direction,expected_offset", [
     (Direction.UP, (0, -1)),
-    (Direction.DOWN, (0, 1)),
     (Direction.LEFT, (-1, 0)),
     (Direction.RIGHT, (1, 0)),
 ])
-
 def test_direction_offsets(direction, expected_offset):
     """
         Test that each direction produces correct offset
     """
     game = SnakeGame()
+    # For DOWN, need to turn first since snake starts moving UP
+    if direction == Direction.DOWN:
+        game.direction = Direction.LEFT
+        game.update()
+
     initial_head = game.snake[0]
     game.direction = direction
     game.update()
@@ -330,9 +331,30 @@ def test_direction_offsets(direction, expected_offset):
     actual_offset = (new_head[0] - initial_head[0], new_head[1] - initial_head[1])
     assert actual_offset == expected_offset
 
+
+def test_direction_offset_down():
+    """
+        Separate test for DOWN direction
+    """
+    game = SnakeGame()
+    # Snake starts with direction UP, change to LEFT first
+    game.direction = Direction.LEFT
+    game.update()
+
+    initial_head = game.snake[0]
+    game.direction = Direction.DOWN
+    game.update()
+
+    new_head = game.snake[0]
+    actual_offset = (new_head[0] - initial_head[0], new_head[1] - initial_head[1])
+    assert actual_offset == (0, 1)
+
+
 @pytest.mark.parametrize("grid_size", [10, 20, 30, 50])
 def test_different_grid_sizes(grid_size):
-    """Test game works with different grid sizes"""
+    """
+        Test game works with different grid sizes
+    """
     game = SnakeGame(grid_size=grid_size)
     assert game.grid_size == grid_size
     game.update()

@@ -1,10 +1,5 @@
-from asyncio import SendfileNotAvailableError
-from turtledemo.penrose import start
-
-from numpy.f2py.auxfuncs import isint1
-
-from game.game_engine import Direction
 from game.ai_agent import SnakeAI
+from game.game_engine import Direction
 import pytest
 
 @pytest.fixture
@@ -19,8 +14,9 @@ def sample_game_state():
         'grid_size': 20,
         'score': 0,
         'game_over': False,
-        'moves': 0
+        'moves': 0,
     }
+
 
 class TestAIInitialization:
     """
@@ -38,6 +34,7 @@ class TestAIInitialization:
         ai = SnakeAI(strategy='safe')
         assert ai.strategy == 'safe'
 
+
 class TestSimpleStrategy:
     """
         Test simple greedy strategy
@@ -51,7 +48,7 @@ class TestSimpleStrategy:
 
     def test_simple_strategy_moves_toward_food_horizontally(self, sample_game_state):
         ai = SnakeAI(strategy='simple')
-        sample_game_state['food'] = (15, 10)    # Food to the right
+        sample_game_state['food'] = (15, 10)  # Food to the right
         direction = ai.get_next_move(sample_game_state)
         assert direction == Direction.RIGHT
 
@@ -60,11 +57,11 @@ class TestSimpleStrategy:
         direction = ai.get_next_move(sample_game_state)
         assert isinstance(direction, Direction)
 
-    def test_simple_strategy_avoid_walls(self):
+    def test_simple_strategy_avoids_walls(self):
         ai = SnakeAI(strategy='simple')
         game_state = {
-            'snake': [(0, 10), (1, 10), (2, 10)],   # at left wall
-            'food': (0, 5),                         # food also at left wall
+            'snake': [(0, 10), (1, 10), (2, 10)],  # At left wall
+            'food': (0, 5),  # Food also at left wall
             'direction': 'up',
             'grid_size': 20,
             'score': 0,
@@ -72,8 +69,9 @@ class TestSimpleStrategy:
             'moves': 0,
         }
         direction = ai.get_next_move(game_state)
-        # Should not try to move LEFT into a wall
+        # Should not try to move LEFT into wall
         assert direction != Direction.LEFT
+
 
 class TestAStarStrategy:
     """
@@ -86,7 +84,7 @@ class TestAStarStrategy:
 
     def test_astar_returns_direction_toward_food(self, sample_game_state):
         ai = SnakeAI(strategy='astar')
-        # Food at (10, 5), snake at (10, 10), should move up
+        # Food at (10, 5), snake at (10, 10), should move UP
         direction = ai.get_next_move(sample_game_state)
         assert direction == Direction.UP
 
@@ -109,7 +107,7 @@ class TestSafeStrategy:
     def test_safe_strategy_returns_valid_direction(self, sample_game_state):
         ai = SnakeAI(strategy='safe')
         direction = ai.get_next_move(sample_game_state)
-        assert isinstance(direction, Direction)
+        assert isinstance(direction, Direction), f"Expected Direction, got {type(direction)}"
 
     def test_safe_strategy_prioritizes_space(self):
         ai = SnakeAI(strategy='safe')
@@ -124,7 +122,27 @@ class TestSafeStrategy:
             'moves': 0,
         }
         direction = ai.get_next_move(game_state)
-        assert isinstance(direction, Direction)
+        assert isinstance(direction, Direction), f"Expected Direction, got {type(direction)}"
+
+    def test_safe_strategy_handles_no_safe_moves(self):
+        """
+            Test safe strategy when cornered
+        """
+        ai = SnakeAI(strategy='safe')
+        # Create a nearly trapped situation
+        game_state = {
+            'snake': [(1, 1), (1, 2), (2, 2), (2, 1)],
+            'food': (10, 10),
+            'direction': 'up',
+            'grid_size': 20,
+            'score': 0,
+            'game_over': False,
+            'moves': 0,
+        }
+        # Should still return a direction (even if it's desperate)
+        direction = ai.get_next_move(game_state)
+        assert isinstance(direction, Direction), f"Expected Direction, got {type(direction)}"
+
 
 class TestPathfinding:
     """
@@ -140,7 +158,7 @@ class TestPathfinding:
         path = ai.astar_search(start, goal, snake, grid_size)
         assert path is not None
         assert path[0] == start
-        assert path[:-1] == goal
+        assert path[-1] == goal
 
     def test_astar_search_avoids_snake_body(self):
         ai = SnakeAI(strategy='astar')
@@ -153,22 +171,24 @@ class TestPathfinding:
         path = ai.astar_search(start, goal, snake, grid_size)
         if path:
             # Path should go around snake body
-            for pos in path[1:]:    # Skip start position
-                assert pos not in snake[:-1]    # Exclude tail
+            for pos in path[1:]:  # Skip start position
+                assert pos not in snake[:-1]  # Exclude tail
 
     def test_astar_returns_none_when_no_path(self):
         ai = SnakeAI(strategy='astar')
-        start_pos = (5, 5)
+        start = (5, 5)
         goal = (10, 10)
         # Completely surround the start position
         snake = [
-            (5, 5),                            # Start
-            (4, 5), (6, 5), (5, 4), (5, 6),    # Adjacent
-            (4, 4), (6, 4), (4, 6), (6, 6),    # Diagonal
+            (5, 5),  # Start
+            (4, 5), (6, 5), (5, 4), (5, 6),  # Adjacent
+            (4, 4), (6, 4), (4, 6), (6, 6),  # Diagonal
         ]
         grid_size = 20
-        path = ai.astar_search(start_pos, goal, snake, grid_size)
+
+        path = ai.astar_search(start, goal, snake, grid_size)
         assert path is None
+
 
 class TestSafetyChecks:
     """
@@ -180,10 +200,10 @@ class TestSafetyChecks:
         direction = Direction.LEFT
         game_state = {
             'snake': [(0, 10), (1, 10)],
-            'grid': 20,
+            'grid_size': 20,
         }
         is_safe = ai.is_move_safe(head, direction, game_state)
-        assert is_safe is False     # Would hit wall
+        assert is_safe is False  # Would hit wall
 
     def test_is_move_safe_detects_self_collision(self):
         ai = SnakeAI()
@@ -194,7 +214,7 @@ class TestSafetyChecks:
             'grid_size': 20,
         }
         is_safe = ai.is_move_safe(head, direction, game_state)
-        assert is_safe is False     # Would hit own body
+        assert is_safe is False  # Would hit own body
 
     def test_is_move_safe_allows_safe_move(self):
         ai = SnakeAI()
@@ -219,14 +239,15 @@ class TestSafetyChecks:
 
     def test_count_reachable_spaces(self):
         ai = SnakeAI()
-        start_pos = (10, 10)
+        start = (10, 10)
         game_state = {
             'snake': [(5, 5), (5, 6)],  # Far away
             'grid_size': 20,
         }
-        count = ai.count_reachable_spaces(start_pos, game_state)
+        count = ai.count_reachable_spaces(start, game_state)
         assert count > 0
         assert count <= 100  # Limited by search depth
+
 
 class TestUtilityMethods:
     """
@@ -281,12 +302,13 @@ class TestDifferentStrategies:
         for strategy_name in strategies:
             ai = SnakeAI(strategy=strategy_name)
             direction = ai.get_next_move(sample_game_state)
-            assert isinstance(direction, Direction), f"{strategy_name} failed"
+            assert isinstance(direction,
+                              Direction), f"{strategy_name} failed - got {type(direction).__name__}: {direction}"
 
     def test_strategies_handle_tight_spaces(self):
         game_state = {
             'snake': [(2, 2), (2, 3), (3, 3)],
-            'food': (18, 18),   # Far away
+            'food': (18, 18),  # Far away
             'direction': 'up',
             'grid_size': 20,
             'score': 0,
@@ -296,7 +318,7 @@ class TestDifferentStrategies:
         for strategy in ['simple', 'astar', 'safe']:
             ai = SnakeAI(strategy=strategy)
             direction = ai.get_next_move(game_state)
-            assert isinstance(direction, Direction)
+            assert isinstance(direction, Direction), f"{strategy} failed - got {type(direction).__name__}: {direction}"
 
 
 # Integration test
@@ -305,7 +327,6 @@ def test_ai_plays_complete_game():
         Test AI can play through a short game
     """
     from game.game_engine import SnakeGame
-
     game = SnakeGame(grid_size=10)
     ai = SnakeAI(strategy='astar')
     max_moves = 50
