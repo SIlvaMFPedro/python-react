@@ -1,8 +1,7 @@
-import React, {useEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
     type Position,
     type AIStrategy,
-    type GameState,
     type WebSocketMessage,
     type ActionMessage,
     GAME_CONFIG,
@@ -36,6 +35,10 @@ import {
     Refresh,
     SmartToy
 } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from "../store/hooks.ts";
+import { updateGameState, resetGame as resetGameState } from "../store/slices/gameSlice.ts";
+import { setConnected, setConnectionError, setLastMessage, setConnection } from "../store/slices/websocketSlice.ts";
+import { setPlaying, setPaused, setAiMode, setAiStrategy, resetUI } from "../store/slices/uiSlice.ts";
 import styles from '../styles/SnakeGame.module.scss';
 
 // ============================================
@@ -44,13 +47,13 @@ import styles from '../styles/SnakeGame.module.scss';
 const SnakeGame: React.FC = () => {
     // Set state variables
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const wsRef = useRef<WebSocket | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const [gameState, setGameState] = useState<GameState | null>(null);
-    const [isConnected, setIsConnected] = useState<boolean>(false);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [aiMode, setAIMode] = useState<boolean>(false);
-    const [aiStrategy, setAIStrategy] = useState<AIStrategy>('astar');
+
+    // Redux selectors
+    const dispatch = useAppDispatch();
+    const gameState = useAppSelector(state => state.game);
+    const { isConnected, connection } = useAppSelector(state => state.websocket);
+    const { isPlaying, aiMode, aiStrategy } = useAppSelector(state => state.ui);
 
     // Set game config
     const { CELL_SIZE, GRID_SIZE } = GAME_CONFIG;
@@ -60,8 +63,8 @@ const SnakeGame: React.FC = () => {
         /**
          * Sends action message to websocket
          */
-        if (wsRef.current && isConnected) {
-            wsRef.current.send(JSON.stringify(message));
+        if (connection && isConnected) {
+            connection.send(JSON.stringify(message));
         }
     };
 
@@ -71,13 +74,9 @@ const SnakeGame: React.FC = () => {
          */
         // console.log('Starting Game');
         sendAction({ action: 'start' });
-        setIsPlaying(true);
+        dispatch(setPlaying(true));
         // Focus container after starting
-        setTimeout(() => {
-            if (containerRef.current) {
-                containerRef.current.focus();
-            }
-        }, 100);
+        setTimeout(() => containerRef.current?.focus(), 100);
     };
 
     const resetGame = (): void => {
@@ -86,8 +85,8 @@ const SnakeGame: React.FC = () => {
          */
         // console.log('Reset Game');
         sendAction({ action: 'reset' });
-        setIsPlaying(false);
-        setAIMode(false);
+        dispatch(resetGameState());
+        dispatch(resetUI());
     };
 
     const pauseGame = (): void => {
@@ -96,7 +95,8 @@ const SnakeGame: React.FC = () => {
          */
         // console.log('Paused Game');
         sendAction({ action: 'pause' });
-        setIsPlaying(false);
+        dispatch(setPaused(true));
+        dispatch(setPlaying(false));
     };
 
     const toggleAI = (): void => {
@@ -107,12 +107,12 @@ const SnakeGame: React.FC = () => {
         sendAction({ action: 'toggle_ai' });
     }
 
-    const changeAIStrategy = (strategy: AIStrategy): void => {
+    const changeAIStrategy = (strategy: string): void => {
         /**
          * Sends message to change ai strategy
          */
         // console.log('Changing AI strategy to: ', strategy);
-        sendAction({ action: 'set_ai_strategy', strategy});
+        sendAction({ action: 'set_ai_strategy', strategy: strategy as never });
     }
 
     const handleKeyPress = useCallback((event: KeyboardEvent): void => {
@@ -140,43 +140,44 @@ const SnakeGame: React.FC = () => {
             event.preventDefault(); // Prevent page scrolling
             const direction = KEYBOARD_CONTROLS[event.key];
             // console.log('Sending direction: ', direction);
-            if (wsRef.current) {
+            if (connection) {
                 const message: ActionMessage = {
                     action: 'direction',
                     direction: direction
                 };
-                wsRef.current.send(JSON.stringify(message));
+                connection.send(JSON.stringify(message));
             }
         }
 
-    }, [isPlaying, aiMode, toggleAI]);
+    }, [isPlaying, aiMode, connection, toggleAI]);
 
     // Handle websocket connection
     useEffect(() => {
         // Connect to WebSocket
         const ws = new WebSocket(getWebSocketURL());
-        wsRef.current = ws;
+        dispatch(setConnection(ws));
 
         ws.onopen = () => {
             console.log("WebSocket Connected");
-            setIsConnected(true);
+            dispatch(setConnected(true));
         };
 
         ws.onmessage = (event: MessageEvent) => {
             const data: WebSocketMessage = JSON.parse(event.data);
+            dispatch(setLastMessage(data));
             // Check game state message
             if (isGameStateMessage(data)) {
-                setGameState(data.state);
+                dispatch(updateGameState(data.state));
                 if (data.ai_mode !== undefined) {
-                    setAIMode(data.ai_mode);
+                    dispatch(setAiMode(data.ai_mode));
                 }
                 if (data.ai_strategy) {
-                    setAIStrategy(data.ai_strategy);
+                    dispatch(setAiStrategy(data.ai_strategy));
                 }
                 else if (isAIStatusMessage(data)) {
-                    setAIMode(data.ai_mode);
+                    dispatch(setAiMode(data.ai_mode));
                     if (data.strategy) {
-                        setAIStrategy(data.strategy);
+                        dispatch(setAiStrategy(data.strategy));
                     }
                 }
             }
@@ -184,33 +185,24 @@ const SnakeGame: React.FC = () => {
 
         ws.onclose = () => {
             console.log("WebSocket Disconnected");
-            setIsConnected(false);
+            dispatch(setConnected(false));
         };
 
         ws.onerror = (error: Event) => {
             console.log("WebSocket Error: ", error);
+            dispatch(setConnectionError('Connection Failed'));
         };
 
         return () => {
             ws.close();
+            dispatch(setConnection(null));
         };
-    }, []);
-
-    // Handle keyboard
-    useEffect(() => {
-        // Add keyboard event listener to document
-        // console.log('Setting up keyboard listener, isPlaying: ', isPlaying, 'aiMode: ', aiMode);
-        document.addEventListener('keydown', handleKeyPress);
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, [aiMode, handleKeyPress, isPlaying]);
+    }, [dispatch]);
 
     // Handle draw game logic
     useEffect(() => {
         // Draw game state
-        if (!gameState || !canvasRef.current) return;
+        if (!gameState.snake.length || !canvasRef.current) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -259,7 +251,7 @@ const SnakeGame: React.FC = () => {
         }
 
         // Draw game over overlay
-        if (gameState.game_over) {
+        if (gameState.gameOver) {
             ctx.fillStyle = COLORS.gameOver;
             ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
@@ -283,6 +275,16 @@ const SnakeGame: React.FC = () => {
             }
         }
     }, [gameState, aiMode, aiStrategy, CANVAS_SIZE, CELL_SIZE, GRID_SIZE]);
+
+    // Handle keyboard
+    useEffect(() => {
+        // Add keyboard event listener to document
+        // console.log('Setting up keyboard listener, isPlaying: ', isPlaying, 'aiMode: ', aiMode);
+        document.addEventListener('keydown', handleKeyPress);
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress);
+        };
+    }, [handleKeyPress]);
 
     // Focus on mount and when game starts
     useEffect(() => {
