@@ -84,7 +84,7 @@ class PlayerStatistics(models.Model):
     """
         Overall player statistics across all sessions
     """
-    user = models.OneToOneField(User, on_delete=CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     # Totals
     total_sessions = models.IntegerField(default=0)
     total_hands = models.IntegerField(default=0)
