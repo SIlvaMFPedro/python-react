@@ -1,0 +1,32 @@
+.actionButtons {
+  width: 100%;
+}
+
+.button {
+  min-width: 120px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: translate(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 768px) {
+  .button {
+    min-width: 100px;
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}
