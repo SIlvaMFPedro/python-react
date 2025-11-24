@@ -1,0 +1,117 @@
+.card {
+  width: 90px;
+  height: 126px;
+  position: relative;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+  &.animate {
+    animation: dealCard 0.5s ease-out;
+  }
+}
+
+@keyframes dealCard {
+  from {
+    transform: translateX(-100px) translateY(-50px) rotate(-20deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+.cardFront,
+.cardBack {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cardFront {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  border: 2px solid #333;
+
+  &.red {
+    .rank,
+    .suit,
+    .largeSuit,
+    .faceCard,
+    .suitPattern {
+      color: #d32f2f;
+    }
+  }
+  &.black {
+    .rank,
+    .suit,
+    .largeSuit,
+    .faceCard,
+    .suitPattern {
+      color: #000;
+    }
+  }
+}
+
+.corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: bold;
+  line-height: 1;
+
+  &.bottomRight {
+    transform: rotate(180deg);
+  }
+}
+
+.rank {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.suit {
+  font-size: 16px;
+}
+
+.centerSuit {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.largeSuit {
+  font-size: 48px;
+}
+
+.faceCard {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.suitPattern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 20px;
+}
+
+.cardBack {
+  background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0d47a1;
+}
