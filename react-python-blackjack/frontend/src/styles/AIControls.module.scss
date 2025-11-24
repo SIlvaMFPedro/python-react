@@ -1,0 +1,162 @@
+.aiControls {
+  background: rgba(26, 92, 58, 0.9) !important;
+  border: 2px solid #9c27b0;
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.icon {
+  color: #9c27b0;
+  font-size: 28px;
+}
+
+.title {
+  color: #fff;
+  font-weight: bold;
+  flex: 1;
+}
+
+.statusChip {
+  font-weight: bold;
+}
+
+.toggle {
+  color: #fff;
+  margin-bottom: 15px;
+
+  .MuiSwitch-root {
+    .MuiSwitch-switchBase.Mui-checked {
+      color: #9c27b0;
+      & + .MuiSwitch-track {
+        background-color: #9c27b0;
+      }
+    }
+  }
+}
+
+.strategySection {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sectionTitle {
+  color: #ffd700;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.strategyButtons {
+  margin-bottom: 15px;
+
+  .MuiButtonGroup-grouped {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.strategyButton {
+  color: #fff;  !important;
+  padding: 10px 15px;
+  font-size: 12px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
+  }
+  &.active {
+    color: #fff; !important;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.strategyInfo {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.value {
+  color: #fff;
+  text-align: right;
+  flex: 1;
+  margin-left: 10px;
+}
+
+.aiStatus {
+  background: rgba(156, 39, 176, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(156, 39, 176, 0.4);
+  text-align: center;
+}
+
+.manualMode {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .strategyButton {
+    font-size: 10px;
+    padding: 8px 10px;
+
+    .MuiButton-startIcon {
+      margin-right: 4px;
+      svg {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .value {
+    text-align: center;
+    margin-left: 0;
+  }
+}
