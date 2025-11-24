@@ -1,0 +1,106 @@
+.bettingControls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.chipDisplay {
+  text-align: center;
+  color: #fff;
+}
+
+.title {
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.betAmount {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.selectedBet {
+  color: #4caf50;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.chipStack {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.chip {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 4px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+  }
+
+  &:hover:not(.disabled) {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  &:active:not(.disabled) {
+    transform: scale(1.05) translateY(-2px);
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.chipInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.chipValue {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.actionButtons {
+  width: 100%;
+  max-width: 500px;
+}
+
+.error {
+  color: #ff5252;
+  text-align: center;
+}
+
+@keyframes chipBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateX(-10px);
+  }
+}
+
+.chip:active:not(.disabled) {
+  animation: chipBounce 0.3s ease;
+}
