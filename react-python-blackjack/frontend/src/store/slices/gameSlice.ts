@@ -1,8 +1,9 @@
-import { createSlice, type PayloadAction} from "@reduxjs/toolkit";
-import type { RootState } from "../index.ts";
-import type { GameState, Hand, GamePhase } from "../../utils/utils.ts";
+// frontend/src/store/slices/blackjackSlice.ts
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '../index';
+import type {GameState, Hand, GamePhase} from "../../utils/utils";
 
-interface BlackJackGameState {
+interface BlackjackState {
     playerHands: Hand[];
     dealerHand: Hand | null;
     currentHandIndex: number;
@@ -15,7 +16,7 @@ interface BlackJackGameState {
     lastMessage: string | null;
 }
 
-const initialState: BlackJackGameState = {
+const initialState: BlackjackState = {
     playerHands: [],
     dealerHand: null,
     currentHandIndex: 0,
@@ -26,7 +27,7 @@ const initialState: BlackJackGameState = {
     deckRemaining: 312, // 6 decks
     lastError: null,
     lastMessage: null,
-}
+};
 
 export const blackjackSlice = createSlice({
     name: 'blackjack',
@@ -80,7 +81,8 @@ export const {
 export const selectPlayerHands = (state: RootState) => state.blackjack.playerHands;
 export const selectDealerHand = (state: RootState) => state.blackjack.dealerHand;
 export const selectCurrentHandIndex = (state: RootState) => state.blackjack.currentHandIndex;
-export const selectCurrentHand = (state: RootState) => state.blackjack.playerHands[state.blackjack.currentHandIndex];
+export const selectCurrentHand = (state: RootState) =>
+    state.blackjack.playerHands[state.blackjack.currentHandIndex];
 export const selectGamePhase = (state: RootState) => state.blackjack.gamePhase;
 export const selectPlayerChips = (state: RootState) => state.blackjack.playerChips;
 export const selectCurrentBet = (state: RootState) => state.blackjack.currentBet;
@@ -88,39 +90,50 @@ export const selectInsuranceBet = (state: RootState) => state.blackjack.insuranc
 export const selectDeckRemaining = (state: RootState) => state.blackjack.deckRemaining;
 export const selectLastError = (state: RootState) => state.blackjack.lastError;
 export const selectLastMessage = (state: RootState) => state.blackjack.lastMessage;
+
 // Computed selectors
-export const selectCanBet = (state: RootState) => state.blackjack.gamePhase === 'betting' && state.blackjack.playerChips > 0;
-export const selectCanStand = (state: RootState) => state.blackjack.gamePhase === 'playing';
+export const selectCanBet = (state: RootState) =>
+    state.blackjack.gamePhase === 'betting' && state.blackjack.playerChips > 0;
+
 export const selectCanHit = (state: RootState) => {
     const phase = state.blackjack.gamePhase;
     const currentHand = state.blackjack.playerHands[state.blackjack.currentHandIndex];
     return phase === 'playing' && currentHand && !currentHand.is_bust && !currentHand.is_blackjack;
 };
+
+export const selectCanStand = (state: RootState) =>
+    state.blackjack.gamePhase === 'playing';
+
 export const selectCanDouble = (state: RootState) => {
     const phase = state.blackjack.gamePhase;
     const currentHand = state.blackjack.playerHands[state.blackjack.currentHandIndex];
     const chips = state.blackjack.playerChips;
     return phase === 'playing' && currentHand && currentHand.can_double && chips >= currentHand.bet;
 };
+
 export const selectCanSplit = (state: RootState) => {
     const phase = state.blackjack.gamePhase;
     const currentHand = state.blackjack.playerHands[state.blackjack.currentHandIndex];
     const chips = state.blackjack.playerChips;
     return phase === 'playing' && currentHand && currentHand.can_split && chips >= currentHand.bet;
 };
+
 export const selectCanSurrender = (state: RootState) => {
     const phase = state.blackjack.gamePhase;
     const currentHand = state.blackjack.playerHands[state.blackjack.currentHandIndex];
     return phase === 'playing' && currentHand && currentHand.cards.length === 2 && state.blackjack.currentHandIndex === 0;
 };
+
 export const selectCanInsure = (state: RootState) => {
     const phase = state.blackjack.gamePhase;
     const dealerHand = state.blackjack.dealerHand;
     const chips = state.blackjack.playerChips;
     const bet = state.blackjack.currentBet;
     return phase === 'playing' &&
-            dealerHand && dealerHand.cards[0]?.rank === 'A' &&
-            chips >= bet / 2 && !state.blackjack.insuranceBet;
+        dealerHand &&
+        dealerHand.cards[0]?.rank === 'A' &&
+        chips >= bet / 2 &&
+        !state.blackjack.insuranceBet;
 };
 
 // Reducer

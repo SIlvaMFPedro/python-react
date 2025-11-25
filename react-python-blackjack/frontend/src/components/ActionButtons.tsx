@@ -9,7 +9,7 @@ interface ActionButtonsProps {
     canDouble: boolean;
     canSplit: boolean;
     canSurrender: boolean;
-    canInsure: boolean;
+    canInsure: boolean | null;
     onHit: () => void;
     onStand: () => void;
     onDouble: () => void;

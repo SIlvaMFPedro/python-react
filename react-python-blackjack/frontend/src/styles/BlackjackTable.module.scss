@@ -1,0 +1,172 @@
+.tableContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f4c27 0%, #1a5c3a 50%, #0f4c27 100%);
+  padding: 20px;
+}
+
+.table {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  backdrop-filter: blur(20px);
+}
+
+.title {
+  color: #ffd700;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dealerSection,
+.playerSection {
+  background: rgba(26, 92, 58, 0.8) !important;
+  border: 3px solid #ffd700;
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.sectionTitle {
+  color: #fff;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.handArea {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  flex-wrap: wrap;
+}
+
+.handsContainer {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.handWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  min-width: 200px;
+
+  &.activeHand {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+}
+
+.handInfo {
+  text-align: center;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.resultChip {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.controlsArea {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gameControls {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.gameArea {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.headerRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.aiChip {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(156, 39, 176, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(156, 39, 176, 0);
+  }
+}
+
+.newGameButton {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dealButton {
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(225, 215, 0, 0.5);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(225, 215, 0, 0.7);
+  }
+  &:active {
+    transform: translateY(-1px);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .handsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .handArea {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
