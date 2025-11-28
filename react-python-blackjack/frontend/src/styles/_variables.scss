@@ -1,0 +1,123 @@
+// ============================================
+//          Color Palettes
+// ============================================
+
+// Primary Colors
+$primary-color: #4ecdc4;
+$primary-light: #5fe0d7;
+$primary-dark: #3db9b0;
+
+// Secondary Colors (AI Mode)
+$secondary-color: #9b59b6;
+$secondary-light: #a569c4;
+$secondary-dark: #8e44ad;
+
+// Background Colors
+$bg-primary: #0f0f1e;
+$bg-secondary: #16213e;
+$bg-tertiary: #1a1a2e;
+$bg-dark: #2c3e50;
+
+// UI Colors
+$color-food: #ff6b6b;
+$color-success: #4ecdc4;
+$color-warning: #ffd93d;
+$color-danger: #ff6b6b;
+$color-info: #3498db;
+
+// Text Colors
+$text-primary: #4ecdc4;
+$text-secondary: #b0b0b0;
+$text-disabled: #666666;
+
+// Snake Colors
+$snake-head: #4ecdc4;
+$snake-body: #45b7af;
+$ai-snake-head: #9b59b6;
+$ai-snake-body: #8e44ad;
+
+// Grid & Canvas Colors
+$grid-color: #16213e;
+$canvas-border: 3px;
+
+// Overlay Colors
+$overlay-ai: rgba(155, 89, 182, 0.2);
+$overlay-gameover: rgba(0, 0, 0, 0.7);
+
+// ============================================
+//          Spacing Parameters
+// ============================================
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+$spacing-xxxl: 32px;
+
+// ============================================
+//          Typography Parameters
+// ============================================
+$font-family-primary: 'Arial', sans-serif;
+$font-family-mono: 'Courier New', monospace;
+
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-md: 16px;
+$font-size-lg: 20px;
+$font-size-xl: 24px;
+$font-size-xxl: 40px;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// ============================================
+//       Game Configuration Parameters
+// ============================================
+$cell-size: 25px;
+$grid-size: 20;
+$canvas-size: $cell-size * $grid-size;
+
+// ============================================
+//       Border Width & Radius Parameters
+// ============================================
+$border-radius-sm: 5px;
+$border-radius-md: 10px;
+$border-radius-lg: 15px;
+$border-width-thin: 1px;
+$border-width-medium: 2px;
+$border-width-thick: 3px;
+
+// ============================================
+//       Shadow Parameters
+// ============================================
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+$shadow-glow-primary: 0 0 20px rgba(78, 205, 196, 0.3);
+$shadow-glow-secondary: 0 0 20px rgba(155, 89, 182, 0.5);
+
+// ============================================
+//       Transition Parameters
+// ============================================
+$transition-fast: 150ms ease-in-out;
+$transition-normal: 300ms ease-in-out;
+$transition-slow: 500ms ease-in-out;
+
+// ============================================
+//       Breakpoint Parameters
+// ============================================
+$breakpoint-mobile: 480px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
+$breakpoint-wide: 1440px;
+
+// ============================================
+//       Z-Index Parameters
+// ============================================
+$z-index-canvas: 1;
+$z-index-overlay: 10;
+$z-index-modal: 100;
+$z-index-tooltip: 1000;
