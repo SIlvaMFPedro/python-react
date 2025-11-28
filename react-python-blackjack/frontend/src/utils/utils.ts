@@ -169,3 +169,18 @@ export interface HandHistory {
 // ============================================
 //      Utility Functions
 // ============================================
+/**
+ * Get the WebSocket URL based on environment
+ */
+export function getWebSocketURL(gameId: string = 'default'): string {
+    /*
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = process.env.NODE_ENV === 'production'
+            ? window.location.host
+            : 'localhost:8000';
+        return `${protocol}//${host}/ws/game/${gameId}/`;
+    */
+    // For development, hardcode localhost
+    // return `ws://127.0.0.1:8000/ws/game/${gameId}/`;
+    return `ws://localhost:8000/ws/blackjack/${gameId}/`;
+}

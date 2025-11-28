@@ -29,6 +29,7 @@ import {
 } from '../store/slices/uiSlice';
 import { setConnected, setConnection } from '../store/slices/webSocketSlice';
 import type {ActionMessage, AIStrategy} from "../utils/utils";
+import { getWebSocketURL } from "../utils/utils";
 import Card from "../components/Card";
 import BettingControls from "../components/BettingControls";
 import ActionButtons from "../components/ActionButtons";
@@ -120,7 +121,7 @@ const BlackJackTable: React.FC = () => {
 
     // Websocket setup
     useEffect(() => {
-        const ws = new WebSocket("ws://127.0.0.1:8080/ws/blackjack/default/");
+        const ws = new WebSocket(getWebSocketURL());
         wsRef.current = ws;
         dispatch(setConnection(ws));
 

@@ -73,7 +73,7 @@
 }
 
 .strategyButton {
-  color: #fff;  !important;
+  color: #fff  !important;
   padding: 10px 15px;
   font-size: 12px;
   transition: all 0.3s ease;
@@ -83,7 +83,7 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
   }
   &.active {
-    color: #fff; !important;
+    color: #fff !important;
     font-weight: bold;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   }
