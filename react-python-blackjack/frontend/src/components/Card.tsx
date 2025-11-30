@@ -11,24 +11,31 @@ interface CardProps {
 }
 
 const renderCenterPattern = (rank: string, suit: string) => {
-    // Render suit pattern based on rank
+    /**
+     * Render suit pattern based on rank
+     */
+    // Ace - large single suit
     if (rank === 'A') {
         return <span className={styles.largeSuit}>{suit}</span>;
     }
-    else if(['J', 'Q', 'K'].includes(rank)) {
+    // Face cards - show letter only
+    if(['J', 'Q', 'K'].includes(rank)) {
         return <span className={styles.faceCard}>{rank}</span>;
     }
-    else {
-        // Number cards - simplified pattern
-        const numSuits = parseInt(rank);
+    // Number cards - show just center suits(s), not all
+    const num = parseInt(rank);
+    // For cards 2-10, show minimal center pattern
+    if (num === 2 || num === 3) {
         return (
-            <Box className={styles.suitPattern}>
-                {Array.from({ length: Math.min(numSuits, 3)}).map((_, i) => (
-                    <span key={i}>{suit}</span>
+            <Box className={styles.suitPatternVertical}>
+                {Array.from({ length: num }).map((_, i) => (
+                    <span key={i} className={styles.mediumSuit}>{suit}</span>
                 ))}
             </Box>
         );
     }
+    // For 4-10, just show a center suit (keeps card clean)
+    return <span className={styles.mediumSuit}>{suit}</span>
 };
 
 const Card: React.FC<CardProps> = ({ card, faceDown = false, animate = false, delay = 0 }) => {
