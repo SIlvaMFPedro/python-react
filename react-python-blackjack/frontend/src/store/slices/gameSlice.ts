@@ -14,6 +14,11 @@ interface BlackjackState {
     deckRemaining: number;
     lastError: string | null;
     lastMessage: string | null;
+    startingChips: number;
+    sessionProfit: number;
+    handsPlayed: number;
+    handsWon: number;
+    handsLost: number;
 }
 
 const initialState: BlackjackState = {
@@ -27,6 +32,11 @@ const initialState: BlackjackState = {
     deckRemaining: 312, // 6 decks
     lastError: null,
     lastMessage: null,
+    startingChips: 1000,
+    sessionProfit: 0,
+    handsPlayed: 0,
+    handsWon: 0,
+    handsLost: 0,
 };
 
 export const blackjackSlice = createSlice({
@@ -34,6 +44,9 @@ export const blackjackSlice = createSlice({
     initialState,
     reducers: {
         updateGameState: (state, action: PayloadAction<GameState>) => {
+            const previousChips = state.playerChips;
+            const previousPhase = state.gamePhase;
+
             state.playerHands = action.payload.player_hands;
             state.dealerHand = action.payload.dealer_hand;
             state.currentHandIndex = action.payload.current_hand_index;
@@ -43,6 +56,21 @@ export const blackjackSlice = createSlice({
             state.insuranceBet = action.payload.insurance_bet;
             state.deckRemaining = action.payload.deck_remaining;
             state.lastError = null;
+
+            // Update session stats when you finish your hand
+            if (previousPhase !== 'finished' && action.payload.game_phase === 'finished') {
+                state.handsPlayed += 1;
+                const chipDifference = state.playerChips - previousChips;
+                if (chipDifference > 0) {
+                    state.handsWon += 1;
+                }
+                else if (chipDifference < 0) {
+                    state.handsLost += 1;
+                }
+            }
+
+            // Calculate current session profit
+            state.sessionProfit = state.playerChips - state.startingChips;
         },
         setError: (state, action: PayloadAction<string>) => {
             state.lastError = action.payload;
@@ -64,6 +92,13 @@ export const blackjackSlice = createSlice({
             state.currentBet = 0;
             state.insuranceBet = 0;
         },
+        resetSession: (state) => {
+            state.startingChips = state.playerChips;
+            state.sessionProfit = 0;
+            state.handsPlayed = 0;
+            state.handsWon = 0;
+            state.handsLost = 0;
+        },
     },
 });
 
@@ -75,6 +110,7 @@ export const {
     clearError,
     clearMessage,
     resetGame,
+    resetSession,
 } = blackjackSlice.actions;
 
 // Selectors
@@ -90,6 +126,11 @@ export const selectInsuranceBet = (state: RootState) => state.blackjack.insuranc
 export const selectDeckRemaining = (state: RootState) => state.blackjack.deckRemaining;
 export const selectLastError = (state: RootState) => state.blackjack.lastError;
 export const selectLastMessage = (state: RootState) => state.blackjack.lastMessage;
+export const selectSessionProfit = (state: RootState) => state.blackjack.sessionProfit;
+export const selectHandsPlayed = (state: RootState) => state.blackjack.handsPlayed;
+export const selectHandsWon = (state: RootState) => state.blackjack.handsWon;
+export const selectHandsLost = (state: RootState) => state.blackjack.handsLost;
+export const selectStartingChips = (state: RootState) => state.blackjack.startingChips;
 
 // Computed selectors
 export const selectCanBet = (state: RootState) =>

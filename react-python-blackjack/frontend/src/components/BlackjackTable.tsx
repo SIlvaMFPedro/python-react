@@ -5,6 +5,7 @@ import {
     updateGameState,
     setError,
     clearError,
+    resetSession,
     selectPlayerHands,
     selectDealerHand,
     selectGamePhase,
@@ -15,9 +16,13 @@ import {
     selectCanStand,
     selectCanDouble,
     selectCanSplit,
+    selectCanSurrender,
     selectCanInsure,
     selectLastError,
-    selectCanSurrender,
+    selectSessionProfit,
+    selectHandsPlayed,
+    selectHandsWon,
+    selectHandsLost,
 } from '../store/slices/gameSlice';
 import {
     setAiMode,
@@ -31,6 +36,7 @@ import { setConnected, setConnection } from '../store/slices/webSocketSlice';
 import type {ActionMessage, AIStrategy} from "../utils/utils";
 import { getWebSocketURL } from "../utils/utils";
 import Card from "../components/Card";
+import ProfitDisplay from "../components/ProfitDisplay";
 import BettingControls from "../components/BettingControls";
 import ActionButtons from "../components/ActionButtons";
 import AIControls from "../components/AIControls";
@@ -53,6 +59,10 @@ const BlackJackTable: React.FC = () => {
     const currentHandIndex = useAppSelector(selectCurrentHandIndex);
     const lastError = useAppSelector(selectLastError);
     // const lastMessage = useAppSelector(selectLastMessage);
+    const sessionProfit = useAppSelector(selectSessionProfit);
+    const handsPlayed = useAppSelector(selectHandsPlayed);
+    const handsWon = useAppSelector(selectHandsWon);
+    const handsLost = useAppSelector(selectHandsLost);
 
     const aiMode = useAppSelector(selectAiMode);
     const aiStrategy = useAppSelector(selectAiStrategy);
@@ -119,6 +129,10 @@ const BlackJackTable: React.FC = () => {
         sendAction({ action: 'reset' });
     }
 
+    const handleResetSession = () => {
+        dispatch(resetSession());
+    }
+
     // Websocket setup
     useEffect(() => {
         const ws = new WebSocket(getWebSocketURL());
@@ -175,7 +189,7 @@ const BlackJackTable: React.FC = () => {
     }, [dispatch]);
 
     return (
-        <Container maxWidth="lg" className={styles.tabContainer}>
+        <Container maxWidth="lg" className={styles.tableContainer}>
             <Box className={styles.table}>
                 {/* Header */}
                 <Box className={styles.header}>
@@ -230,7 +244,6 @@ const BlackJackTable: React.FC = () => {
                             <Chip label="Bust!" color="success" className={styles.resultChip} />
                         )}
                     </Paper>
-
                     {/* Player Section */}
                     <Paper className={styles.playerSection} elevation={3}>
                         <Typography variant="h6" className={styles.sectionTitle}>
@@ -276,17 +289,25 @@ const BlackJackTable: React.FC = () => {
                 </Box>
                 {/* Controls Area */}
                 <Box className={styles.controlsArea}>
-                    {/* AI Controls */}
-                    <AIControls
-                        aiMode={aiMode}
-                        aiStrategy={aiStrategy}
-                        aiDescription={aiDescription}
-                        onToggleAI={handleToggleAI}
-                        onChangeStrategy={handleChangeAIStrategy}
-                        disabled={!isConnected}
-                    />
-
-                    {/* Game Controls */}
+                    {/* Left Column: AI Controls + Profit Display */}
+                    <Box className={styles.leftColumn}>
+                        <AIControls
+                            aiMode={aiMode}
+                            aiStrategy={aiStrategy}
+                            aiDescription={aiDescription}
+                            onToggleAI={handleToggleAI}
+                            onChangeStrategy={handleChangeAIStrategy}
+                            disabled={!isConnected}
+                        />
+                        <ProfitDisplay
+                            sessionProfit={sessionProfit}
+                            handsPlayed={handsPlayed}
+                            handsWon={handsWon}
+                            handsLost={handsLost}
+                            onResetSession={handleResetSession}
+                        />
+                    </Box>
+                    {/* Right Column: Game Controls */}
                     <Box className={styles.gameControls}>
                         {gamePhase === 'betting' || gamePhase === 'finished' ? (
                             <BettingControls
@@ -314,7 +335,6 @@ const BlackJackTable: React.FC = () => {
                         )}
                     </Box>
                 </Box>
-
                 {/* New Game Button */}
                 {gamePhase === 'finished' && currentBet === 0 && !aiMode && (
                     <Box className={styles.newGameButton}>
@@ -323,7 +343,6 @@ const BlackJackTable: React.FC = () => {
                         </button>
                     </Box>
                 )}
-
                 {/* Info Message Snackbar */}
                 <Snackbar
                     open={!!infoMessage}
@@ -335,7 +354,6 @@ const BlackJackTable: React.FC = () => {
                         {infoMessage}
                     </Alert>
                 </Snackbar>
-
                 {/* Error Snackbar */}
                 <Snackbar
                     open={!!lastError}
